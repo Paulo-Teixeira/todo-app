@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Todo } from './todo';
+import { ApiService } from './api.service';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -8,7 +10,7 @@ export class TodoDataService {
   lastId: number = 0;
   todos: Todo[] = [];
 
-  constructor() { }
+  constructor(private api: ApiService) { }
 
   addTodo(todo: Todo): TodoDataService {
     if (!todo.id) {
@@ -33,8 +35,8 @@ export class TodoDataService {
     return todo;
   }
 
-  getAllTodos(): Todo[] {
-    return this.todos;
+  getAllTodos(): Observable<Todo[]> {
+    return this.api.getAllTodos();
   }
 
   getTodoById(id: number): Todo {

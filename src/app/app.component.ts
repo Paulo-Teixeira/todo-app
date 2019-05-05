@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { TodoDataService } from './todo-data.service';
 import { Todo } from './todo';
 
@@ -8,11 +8,22 @@ import { Todo } from './todo';
   styleUrls: ['./app.component.scss'],
   providers: []
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'todo-app';
   newTodo: Todo = new Todo();
+  todos: Todo[] = [];
 
   constructor(private todoDataService: TodoDataService) {
+  }
+
+  public ngOnInit(): void {
+    this.todoDataService
+      .getAllTodos()
+      .subscribe(
+        (todos) => {
+          this.todos = todos;
+        }
+      );
   }
 
   onAddTodo(todo: Todo) {
@@ -25,9 +36,5 @@ export class AppComponent {
 
   onRemoveTodo(todo: Todo) {
     this.todoDataService.deleteTodoById(todo.id);
-  }
-
-  get todos() {
-    return this.todoDataService.getAllTodos();
   }
 }
