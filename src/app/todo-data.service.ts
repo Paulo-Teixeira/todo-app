@@ -12,42 +12,29 @@ export class TodoDataService {
 
   constructor(private api: ApiService) { }
 
-  addTodo(todo: Todo): TodoDataService {
-    if (!todo.id) {
-      todo.id = ++this.lastId;
-    }
-    this.todos.push(todo);
-    return this;
+  addTodo(todo: Todo): Observable<Todo[]> {
+    return this.api.createTodo(todo);
   }
 
-  deleteTodoById(id: number): TodoDataService {
-    this.todos = this.todos
-      .filter(todo => todo.id !== id);
-    return this;
+  deleteTodoById(todoId: number): Observable<Todo[]> {
+    return this.api.deleteTodoById(todoId);
   }
 
-  updateTodoById(id: number, values: Object = {}): Todo {
-    const todo = this.getTodoById(id);
-    if (!todo) {
-      return null;
-    }
-    Object.assign(todo, values);
-    return todo;
+  updateTodo(todo: Todo): Observable<Todo[]> {
+    return this.api.updateTodo(todo);
   }
 
   getAllTodos(): Observable<Todo[]> {
     return this.api.getAllTodos();
   }
 
-  getTodoById(id: number): Todo {
-    return this.todos.filter(todo => todo.id === id).pop();
+  getTodoById(todoId: number): Observable<Todo[]> {
+    return this.api.getTodoById(todoId);
   }
 
   toggleTodoComplete(todo: Todo) {
-    const updatedTodo = this.updateTodoById(todo.id, {
-      complete: !todo.complete
-    });
-    return updatedTodo;
+    todo.complete = !todo.complete;
+    return this.api.updateTodo(todo);
   }
 }
 

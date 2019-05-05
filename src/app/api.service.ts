@@ -3,7 +3,7 @@ import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Todo } from './todo';
 import { Observable, of } from 'rxjs';
-import { catchError, map } from "rxjs/operators";
+import { catchError } from 'rxjs/operators';
 
 const API_URL = environment.apiUrl;
 
@@ -21,20 +21,28 @@ export class ApiService {
     );
   }
 
-  public createTodo(todo: Todo) {
-
+  public createTodo(todo: Todo): Observable<Todo[]> {
+    return this.http.post<Todo[]>(API_URL + '/todos', todo).pipe(
+      catchError(this.handleError<Todo[]>('createTodo', []))
+    );
   }
 
-  public getTodoById(todoId: number) {
-
+  public getTodoById(todoId: number): Observable<Todo[]> {
+    return this.http.get<Todo[]>(API_URL + '/todos/' + todoId).pipe(
+      catchError(this.handleError<Todo[]>('getTodoById', []))
+    );
   }
 
-  public updateTodo(todo: Todo) {
-
+  public updateTodo(todo: Todo): Observable<Todo[]> {
+    return this.http.put<Todo[]>(API_URL + '/todos/' + todo.id, todo).pipe(
+      catchError(this.handleError<Todo[]>('updateTodo', []))
+    );
   }
 
-  public deleteTodoById(todoId: number) {
-
+  public deleteTodoById(todoId: number): Observable<null> {
+    return this.http.delete<null>(API_URL + '/todos/' + todoId).pipe(
+      catchError(this.handleError<null>('deleteTodoById'))
+    );
   }
 
   private handleError<T>(operation = "operation", result?: T) {
