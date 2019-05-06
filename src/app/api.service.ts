@@ -3,7 +3,7 @@ import { environment } from '../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Todo } from './todo';
 import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 const API_URL = environment.apiUrl;
 
@@ -14,6 +14,14 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
 
+  public signIn(username: string, password: string) {
+    return this.http.post(API_URL + '/sign-in', {
+      username,
+      password
+    }).pipe(
+      catchError(this.handleError('signIn', []))
+    );
+  }
 
   public getAllTodos(): Observable<Todo[]> {
     return this.http.get<Todo[]>(API_URL + '/todos').pipe(
