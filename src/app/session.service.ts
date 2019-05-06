@@ -8,10 +8,11 @@ export class SessionService {
   public accessToken: string;
   public name: string;
 
-  constructor() { }
+  constructor() {console.log('XX', this.accessToken, this.name); }
 
   public destroy(): void {
     this.accessToken = null;
     this.name = null;
   }
+
 }

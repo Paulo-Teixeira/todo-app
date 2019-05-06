@@ -38,6 +38,14 @@ server.use((req, res, next) => {
   }
 });
 
+// API routes
+server.use(router);
+
+// Start server
+server.listen(3000, () => {
+  console.log('JSON Server is running');
+});
+
 // Check whether request is allowed
 function isAuthorized(req) {
   let bearer = req.get('Authorization');
@@ -46,11 +54,3 @@ function isAuthorized(req) {
   }
   return false;
 }
-
-// API routes
-server.use(router);
-
-// Start server
-server.listen(3000, () => {
-  console.log('JSON Server is running');
-});
