@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpErrorResponse, } from '@angular/common/http';
 import { Todo } from './todo';
 import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 import { SessionService } from '../app/session.service';
 
 const API_URL = environment.apiUrl;
@@ -19,46 +19,78 @@ export class ApiService {
     ) { }
 
   public signIn(username: string, password: string) {
-    return this.http.post(API_URL + '/sign-in', {
-      username,
-      password
-    }).pipe(
-      catchError(this.handleError('signIn', []))
+    return this.http
+      .post(API_URL + '/sign-in', {
+        username,
+        password
+      })
+      .pipe(catchError(this.handleError('signIn', []))
     );
   }
 
   public getAllTodos(): Observable<Todo[]> {
     const options = this.getRequestOptions();
-    return this.http.get<Todo[]>(API_URL + '/todos', options).pipe(
-      catchError(this.handleError<Todo[]>('getAllTodos', []))
+    return this.http
+      .get<Todo[]>(API_URL + '/todos', options)
+      .pipe(
+        map(response => {
+          const todos = <any[]> response;
+          return todos.map((todo) => new Todo(todo));
+        })
+      )
+      .pipe(
+        catchError(this.handleError<Todo[]>('getAllTodos', []))
+      );
+  }
+
+  public createTodo(todo: Todo): Observable<Todo> {
+    const options = this.getRequestOptions();
+    return this.http
+      .post<Todo>(API_URL + '/todos', todo, options)
+      .pipe(
+        map(response => {
+          return new Todo(response);
+        })
+      )
+      .pipe(
+        catchError(this.handleError<Todo>('createTodo'))
     );
   }
 
-  public createTodo(todo: Todo): Observable<Todo[]> {
+  public getTodoById(todoId: number): Observable<Todo> {
     const options = this.getRequestOptions();
-    return this.http.post<Todo[]>(API_URL + '/todos', todo, options).pipe(
-      catchError(this.handleError<Todo[]>('createTodo', []))
+    return this.http
+      .get<Todo>(API_URL + '/todos/' + todoId, options)
+      .pipe(
+        map(response => {
+          return new Todo(response);
+        })
+      )
+      .pipe(
+        catchError(this.handleError<Todo>('getTodoById'))
     );
   }
 
-  public getTodoById(todoId: number): Observable<Todo[]> {
+  public updateTodo(todo: Todo): Observable<Todo> {
     const options = this.getRequestOptions();
-    return this.http.get<Todo[]>(API_URL + '/todos/' + todoId, options).pipe(
-      catchError(this.handleError<Todo[]>('getTodoById', []))
-    );
-  }
-
-  public updateTodo(todo: Todo): Observable<Todo[]> {
-    const options = this.getRequestOptions();
-    return this.http.put<Todo[]>(API_URL + '/todos/' + todo.id, todo, options).pipe(
-      catchError(this.handleError<Todo[]>('updateTodo', []))
+    return this.http
+      .put<Todo>(API_URL + '/todos/' + todo.id, todo, options)
+      .pipe(
+        map(response => {
+          return new Todo(response);
+        })
+      )
+      .pipe(
+        catchError(this.handleError<Todo>('updateTodo'))
     );
   }
 
   public deleteTodoById(todoId: number): Observable<null> {
     const options = this.getRequestOptions();
-    return this.http.delete<null>(API_URL + '/todos/' + todoId, options).pipe(
-      catchError(this.handleError<null>('deleteTodoById'))
+    return this.http
+      .delete<null>(API_URL + '/todos/' + todoId, options)
+      .pipe(
+        catchError(this.handleError<null>('deleteTodoById'))
     );
   }
 
@@ -72,10 +104,15 @@ export class ApiService {
     };
   }
 
+  // private handleError(error: HttpErrorResponse | any) {
+  //   console.error('ApiService::handleError', error);
+  //   return Observable.throw(error);
+  // }
+
   private getRequestOptions() {
-    const options = {
-      headers: new HttpHeaders({'Authorization': 'Bearer ' + this.session.accessToken}),
-    };
-    return options;
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer ' + this.session.accessToken
+    });
+    return { headers };
   }
 }
